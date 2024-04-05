@@ -25,7 +25,7 @@ public class Main {
 
             // global updating
             Ant bestAnt = ants.stream().min(Comparator.comparingDouble(Ant::getTravelledDistance)).get();
-            bestAnt.getTravelled().forEach(e -> e.setPheromoneStrength(e.getPheromoneStrength() + Ant.alpha / bestAnt.getTravelledDistance()));
+            bestAnt.getTravelled().forEach(e -> e.setPheromoneStrength((1 - Ant.alpha) * e.getPheromoneStrength() + Ant.alpha / bestAnt.getTravelledDistance()));
             bestWeightSoFar = Math.min(bestWeightSoFar, bestAnt.getTravelledDistance());
             System.out.println(bestWeightSoFar);
         }
