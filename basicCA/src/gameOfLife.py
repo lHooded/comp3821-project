@@ -7,29 +7,27 @@ from math import floor
 
 plt.rcParams['image.cmap'] = 'binary'
 
-def numLiveNeighbours(state, row, col):
-    return (state[row - 1][col - 1] + state[row - 1][col] + state[row - 1][col + 1] + 
-            state[row][col - 1] + state[row][col + 1] +
-            state[row + 1][col - 1] + state[row + 1][col] + state[row + 1][col + 1])
-
-def cellChangeState(state, row, col):
-    n = numLiveNeighbours(state, row, col)
-    if state[row][col] == 1:
-        if n < 2 or n > 3:
-            return 0
-        else:
-            return 1
-    else:
-        if n == 3:
-            return 1
-        else:
-            return 0
-
 def nextIter(state, size):
-    newState = np.zeros((size, size))
-    for row in range(1, size - 1):
-        for col in range(1, size - 1):
-            newState[row][col] = cellChangeState(state, row, col)
+    mask = np.array([[1, 1, 1],
+                      [1, 0, 1],
+                      [1, 1, 1]])
+    liveNeighboursCount = scipy.signal.convolve2d(state, mask, mode='same')
+
+    newState = np.empty((size, size))
+    for row in range(size):
+        for col in range(size):
+            n = liveNeighboursCount[row][col]
+            if state[row][col] == 1:
+                if n < 2 or n > 3:
+                    newState[row][col] = 0
+                else:
+                    newState[row][col] = 1
+            else:
+                if n == 3:
+                    newState[row][col] = 1
+                else:
+                    newState[row][col] = 0
+    
     return newState
 
 def update(frame, img, state, size):
