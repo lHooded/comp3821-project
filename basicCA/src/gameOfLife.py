@@ -2,6 +2,7 @@ from sys import argv
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import scipy.signal
 from math import floor
 
 plt.rcParams['image.cmap'] = 'binary'
@@ -25,7 +26,7 @@ def cellChangeState(state, row, col):
             return 0
 
 def nextIter(state, size):
-    newState = np.empty((size, size))
+    newState = np.zeros((size, size))
     for row in range(1, size - 1):
         for col in range(1, size - 1):
             newState[row][col] = cellChangeState(state, row, col)
