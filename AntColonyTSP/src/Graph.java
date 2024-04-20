@@ -41,6 +41,10 @@ public class Graph {
         return new ArrayList<>(adj.get(v));
     }
 
+    public Edge getEdge(Vertex a, Vertex b) {
+        return getAdjacentEdges(a).stream().filter(e -> e.getOtherVertex(a) == b).findAny().orElse(null);
+    }
+
     public List<Vertex> getVertices() {
         return new ArrayList<>(adj.keySet());
     }

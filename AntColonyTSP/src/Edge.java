@@ -16,6 +16,10 @@ public class Edge {
         this.b = b;
     }
 
+    public Edge(PositionalVertex a, PositionalVertex b) {
+        this(Math.hypot(a.x() - b.x(), a.y() - b.y()), a, b);
+    }
+
     public double getWeight() {
         return weight;
     }
@@ -55,5 +59,10 @@ public class Edge {
     @Override
     public int hashCode() {
         return Objects.hash(a, b);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + a + ", " + b + ", " + weight + ")";
     }
 }

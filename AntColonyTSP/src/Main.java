@@ -8,7 +8,8 @@ public class Main {
     public static final int nGens = 1000;
 
     public static void main(String[] args) {
-        Graph graph = GraphFactory.RandomCompleteGraph(100, 1, 10);
+//        Graph graph = GraphFactory.RandomCompleteGraph(100, 1, 10);
+        Graph graph = GraphFactory.CoordinatesToCompleteGraph("oliver30.data");
         graph.initPheromone();
 
         double bestWeightSoFar = 1000000000;
@@ -19,9 +20,10 @@ public class Main {
                 ants.add(new Ant(graph.getRandomVertex()));
             }
 
-            for (int j = 0; j < graph.size; ++j) {
+            for (int j = 0; j < graph.size - 1; ++j) {
                 ants.forEach(a -> a.move(graph));
             }
+            ants.forEach(a -> a.finishCycle(graph));
 
             // global updating
             Ant bestAnt = ants.stream().min(Comparator.comparingDouble(Ant::getTravelledDistance)).get();

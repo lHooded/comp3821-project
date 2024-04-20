@@ -4,12 +4,15 @@ public class Ant {
     public final static double decisiveness = 0.9; // q_0
     public final static double alpha = 0.1;
     private HashSet<Vertex> visited = new HashSet<>();
-    private HashSet<Edge> travelled = new HashSet<>();
+    private HashSet<Edge> travelled = new LinkedHashSet<>();
     private double totalWeight = 0;
     private Vertex pos;
+    private Vertex startPos;
 
     public Ant(Vertex pos) {
         this.pos = pos;
+        startPos = pos;
+        visited.add(pos);
     }
 
     public boolean move(Graph graph) {
@@ -47,6 +50,17 @@ public class Ant {
         nextTravelled.setPheromoneStrength((1 - alpha) * nextTravelled.getPheromoneStrength() + alpha * graph.getTau());
 
         return true;
+    }
+
+    public void finishCycle(Graph graph) {
+        Edge finalEdge = graph.getEdge(pos, startPos);
+        if (finalEdge == null) {
+            System.out.println("Cannot find way back to start");
+            System.exit(1);
+        }
+        travelled.add(finalEdge);
+        totalWeight += finalEdge.getWeight();
+        visited.add(startPos);
     }
 
     public HashSet<Edge> getTravelled() {
