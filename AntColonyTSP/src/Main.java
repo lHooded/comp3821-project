@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
 //        Graph graph = GraphFactory.RandomCompleteGraph(100, 1, 10);
-        Graph graph = GraphFactory.CoordinatesToCompleteGraph("oliver30.data");
+        Graph graph = GraphFactory.CoordinatesToCompleteGraph("kroA100.data");
         graph.initPheromone();
 
         double bestWeightSoFar = 1000000000;
