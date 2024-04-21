@@ -2,12 +2,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Graph {
-    public static final double ALPHA = 0.1;
-    public static final double BETA = 2;
-    public static final double Q_0 = 0.925;
-    private double tau = 1/(100 * 24848.02898705297); // 1/(num cities * nearest neighbour heuristic)
+    private double alpha = 0.1;
+    private double beta = 2;
+    private double q_0 = 0.9;
+    private double tau = 1.0/(30 * 480); // 1/(num cities * nearest neighbour heuristic)
 
     private final int numCities;
     private final City[] cities;
@@ -15,7 +16,12 @@ public class Graph {
     private final double[][] processedWeights;
     private final double[][] pheromoneStrength;
 
-    public Graph(String inputFilename, int numCities) {
+    public Graph(String inputFilename, int numCities, double alpha, double beta, double q_0, double tau) {
+        this.alpha = alpha;
+        this.beta = beta;
+        this.q_0 = q_0;
+        this.tau = tau;
+
         this.numCities = numCities;
         weights = new double[numCities][numCities];
         processedWeights = new double[numCities][numCities];
@@ -39,7 +45,7 @@ public class Graph {
             for (i = 0; i < numCities; ++i) {
                 for (int j = i + 1; j < numCities; ++j) {
                     weights[i][j] = Math.hypot(cities[j].x() - cities[i].x(), cities[j].y() - cities[i].y());
-                    processedWeights[i][j] = Math.pow(1.0/weights[i][j], BETA);
+                    processedWeights[i][j] = Math.pow(1.0/weights[i][j], beta);
                 }
             }
 
@@ -77,8 +83,7 @@ public class Graph {
     }
 
     public void run(int numAnts, int numGens, int numRuns) {
-        double sum = 0;
-
+        List<Double> stats = new ArrayList<>();
         for (int run_i = 0; run_i < numRuns; ++run_i) {
             initPheromones();
 
@@ -107,11 +112,19 @@ public class Graph {
             }
             System.out.println(run_i + ": " + bestWeightSoFar);
             assert bestAntSoFar != null;
+            stats.add(bestWeightSoFar);
 //            bestAntSoFar.printPATH();
-            sum += bestWeightSoFar;
         }
-        sum /= numRuns;
-        System.out.println(sum);
+        System.out.println("Min: " + stats.stream().mapToDouble(d -> d).min().getAsDouble());
+        System.out.println("Max: " + stats.stream().mapToDouble(d -> d).max().getAsDouble());
+        // assumes that there are an odd number of runs
+        System.out.println("Median: " + stats.stream().sorted().toList().get(stats.size() / 2));
+
+        double mean = stats.stream().mapToDouble(d -> d).sum() / stats.size();
+        System.out.println("Mean: " + mean);
+
+        double stdvStats = stats.stream().mapToDouble(v -> Math.pow(v - mean, 2)).sum();
+        System.out.println("Standard Deviation: " + Math.pow(stdvStats / stats.size(), 0.5));
     }
 
     public class City {
@@ -191,7 +204,7 @@ public class Graph {
 
             City next;
 
-            if (new Random().nextDouble() < Q_0) {
+            if (new Random().nextDouble() < q_0) {
                 next = desireabilities.keySet().stream().max(Comparator.comparingDouble(desireabilities::get)).orElse(null);
             } else {
                 RandomCollection<City> choices = new RandomCollection<>();
@@ -207,7 +220,7 @@ public class Graph {
             totalWeight += pos.getDistanceTo(next);
 
             // local updating
-            updatePheromone(1 - ALPHA, ALPHA * getTau(), pos, next);
+            updatePheromone(1 - alpha, alpha * getTau(), pos, next);
 
             pos = next;
         }
@@ -223,10 +236,10 @@ public class Graph {
         public void globalUpdate() {
             City prev = null;
             for (City city : visited) {
-                updatePheromone(1 - ALPHA, ALPHA / getDistanceTravelled(), prev, city);
+                updatePheromone(1 - alpha, alpha / getDistanceTravelled(), prev, city);
                 prev = city;
             }
-            updatePheromone(1 - ALPHA, ALPHA / getDistanceTravelled(), pos, startPos);
+            updatePheromone(1 - alpha, alpha / getDistanceTravelled(), pos, startPos);
         }
 
         public void printPATH() {
