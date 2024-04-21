@@ -25,7 +25,7 @@ seed[n] = 1
 
 data = np.zeros((n + 1, size), dtype=int)
 state = seed.copy()
-for i in range(n + 1):
+for i in range(n):
     data[i, :] = state.copy()
     state = nextIter(state, size, rule)
 
